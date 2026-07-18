@@ -1,0 +1,102 @@
+[
+  {
+    "question": "Why does FastAPI use Depends() for dependency injection instead of another approach?",
+    "ground_truth": "FastAPI uses Depends() for dependency injection because it leverages Python's type hints and function signatures to provide a simple, declarative way to handle shared logic like database sessions, authentication, and configuration. This design was inspired by Angular's dependency injection and allows dependencies to be composable, testable, and automatically resolved by the framework. It integrates tightly with the OpenAPI schema generation so dependencies can also declare parameters that appear in the API documentation.",
+    "expected_source_ids": []
+  },
+  {
+    "question": "Why does FastAPI use Pydantic for request and response validation?",
+    "ground_truth": "FastAPI uses Pydantic because it provides data validation and serialization based on Python type hints, aligning with FastAPI's core philosophy of using standard Python types. Pydantic offers automatic JSON Schema generation (used for OpenAPI docs), excellent editor support with autocompletion, and high performance through compiled validation. It was chosen over alternatives like Marshmallow or attrs because of its native type-hint integration and JSON Schema output, which directly feeds into FastAPI's automatic documentation generation.",
+    "expected_source_ids": []
+  },
+  {
+    "question": "Why is FastAPI built on top of Starlette instead of being a standalone framework?",
+    "ground_truth": "FastAPI is built on Starlette because Starlette provides a lightweight, high-performance ASGI framework with battle-tested components for routing, middleware, WebSocket support, and background tasks. Rather than reinventing these foundational components, FastAPI extends Starlette by adding automatic data validation, serialization, and OpenAPI documentation generation on top. This design means FastAPI inherits Starlette's performance (one of the fastest Python frameworks) and its full ecosystem of ASGI middleware and tools.",
+    "expected_source_ids": []
+  },
+  {
+    "question": "Why does FastAPI generate OpenAPI documentation automatically?",
+    "ground_truth": "FastAPI generates OpenAPI documentation automatically because the framework extracts all the information it needs from Python type hints, Pydantic models, and path operation decorators. Since the same type information is used for both validation and documentation, there is no extra effort required from the developer. This was a core design goal: to provide interactive API documentation (via Swagger UI and ReDoc) that is always in sync with the actual code, eliminating the common problem of outdated or incomplete API docs.",
+    "expected_source_ids": []
+  },
+  {
+    "question": "Why does FastAPI support both async and sync path operation functions?",
+    "ground_truth": "FastAPI supports both async and sync path operation functions to accommodate different use cases and developer experience levels. Async functions (async def) are run directly on the event loop for I/O-bound operations, while sync functions (def) are automatically run in a thread pool to avoid blocking the event loop. This design means developers can use whichever style they prefer without worrying about blocking, and it allows gradual adoption of async patterns. The framework detects whether a function is async or sync and handles it appropriately.",
+    "expected_source_ids": []
+  },
+  {
+    "question": "Why does FastAPI use Python type hints as the primary API for defining request parameters?",
+    "ground_truth": "FastAPI uses Python type hints as its primary API because they provide a single source of truth for parameter declaration, validation, serialization, and documentation. Type hints are standard Python (PEP 484+), meaning developers get full editor support with autocompletion and type checking without learning a new DSL. The framework inspects these annotations at startup to generate validation logic, OpenAPI schemas, and dependency resolution, eliminating redundant declarations.",
+    "expected_source_ids": []
+  },
+  {
+    "question": "What was the motivation for adding the 'response_model' parameter to path operations?",
+    "ground_truth": "The response_model parameter was added to allow developers to declare the shape of the response data separately from the return type. This enables automatic response validation, serialization, and filtering (removing fields not in the model), and generates accurate response schemas in the OpenAPI documentation. It also allows returning ORM objects or dicts that get automatically converted and validated against the declared model, providing a clean separation between internal data representation and the public API contract.",
+    "expected_source_ids": []
+  },
+  {
+    "question": "Why does FastAPI's security utilities (OAuth2, HTTP Basic) integrate with the dependency injection system?",
+    "ground_truth": "FastAPI's security utilities integrate with the dependency injection system so that authentication and authorization can be declared as dependencies on path operations. This means security schemes automatically appear in the OpenAPI documentation (enabling the 'Authorize' button in Swagger UI), and the same dependency injection features like caching, composition, and overriding in tests apply to security logic. This design avoids the need for separate decorator-based or middleware-based auth patterns.",
+    "expected_source_ids": []
+  },
+  {
+    "question": "Why does FastAPI use path operation decorators (@app.get, @app.post) instead of a class-based routing approach?",
+    "ground_truth": "FastAPI uses function-based path operation decorators because they provide a simpler, more explicit, and more Pythonic API compared to class-based views. Each decorator clearly maps an HTTP method and path to a function, making the code easy to read and understand. The dependency injection system handles shared logic that would traditionally go in a class, and type hints on function parameters replace the need for class attributes. This design was influenced by Flask's approach and keeps the learning curve low.",
+    "expected_source_ids": []
+  },
+  {
+    "question": "What was the rationale for introducing APIRouter to split applications into multiple files?",
+    "ground_truth": "APIRouter was introduced to allow large FastAPI applications to be organized across multiple files and modules while maintaining a clean separation of concerns. It mirrors the main FastAPI application's API (same decorators, same parameters) so that path operations can be defined in separate modules and then included in the main app. This design is similar to Flask's Blueprints and enables teams to work on different parts of an API independently, with each router potentially having its own prefix, tags, and dependencies.",
+    "expected_source_ids": []
+  },
+  {
+    "question": "Why does FastAPI's CORS middleware use the Starlette implementation rather than a custom one?",
+    "ground_truth": "FastAPI uses Starlette's CORSMiddleware because FastAPI is built on top of Starlette, and Starlette already provides a well-tested, standards-compliant CORS middleware implementation. Rather than duplicating this functionality, FastAPI re-exports and documents Starlette's middleware. This is consistent with FastAPI's philosophy of building on top of Starlette's battle-tested components rather than reimplementing them.",
+    "expected_source_ids": []
+  },
+  {
+    "question": "Why does FastAPI return 422 Unprocessable Entity for validation errors instead of 400 Bad Request?",
+    "ground_truth": "FastAPI returns 422 Unprocessable Entity for validation errors because this is the HTTP status code specified by the JSON Schema and OpenAPI specifications for request validation failures. While 400 Bad Request is a general client error, 422 specifically means the server understood the content type and syntax but couldn't process the contained instructions due to semantic errors. This aligns with FastAPI's strict adherence to standards and its use of Pydantic which generates JSON Schema-compatible error responses.",
+    "expected_source_ids": []
+  },
+  {
+    "question": "What was the design rationale for BackgroundTasks in FastAPI?",
+    "ground_truth": "BackgroundTasks was designed to provide a simple way to run tasks after returning a response, without requiring an external task queue like Celery. It leverages Starlette's background task system and integrates with FastAPI's dependency injection so tasks can be added from path operations or dependencies. This design handles common use cases like sending notification emails or writing logs after a response, where a full task queue would be overkill.",
+    "expected_source_ids": []
+  },
+  {
+    "question": "Why does FastAPI use the 'lifespan' context manager for startup and shutdown events instead of @app.on_event?",
+    "ground_truth": "The lifespan context manager was introduced to replace the deprecated @app.on_event('startup') and @app.on_event('shutdown') decorators because it provides a cleaner way to manage application lifecycle resources. Using an async context manager with yield allows resources (like database connection pools) to be created at startup and properly cleaned up at shutdown in a single, cohesive block of code. It also makes it easier to share state between startup and shutdown phases and is the pattern recommended by Starlette.",
+    "expected_source_ids": []
+  },
+  {
+    "question": "Why does FastAPI's TestClient use requests under the hood instead of httpx directly?",
+    "ground_truth": "FastAPI's TestClient originally used the requests library (via Starlette's TestClient) because requests was the de facto standard HTTP client in Python with a well-known API. However, Starlette later migrated TestClient to use httpx, which supports async operations and has a similar API to requests. FastAPI followed this change since it inherits Starlette's TestClient. The transition to httpx enabled better support for testing async endpoints and WebSocket connections.",
+    "expected_source_ids": []
+  },
+  {
+    "question": "What was the motivation for FastAPI's approach to handling form data and file uploads?",
+    "ground_truth": "FastAPI handles form data and file uploads by using python-multipart under the hood and exposing them through type-annotated parameters (Form() and File()/UploadFile). This design integrates form handling into the same type-hint-based system used for JSON bodies and query parameters, providing consistent validation and documentation. UploadFile was specifically designed as a wrapper around SpooledTemporaryFile to handle large file uploads efficiently without loading everything into memory.",
+    "expected_source_ids": []
+  },
+  {
+    "question": "Why does FastAPI use Annotated for declaring dependencies and parameters in newer versions?",
+    "ground_truth": "FastAPI adopted Annotated (from typing or typing_extensions) for declaring dependencies and parameters because it provides a more standards-compliant way to attach metadata to type hints (PEP 593). Using Annotated[int, Query()] instead of param: int = Query() separates the type from the metadata, makes type checkers happier, enables better reuse of annotated types as aliases, and avoids issues with mutable default values. It was introduced as the recommended approach while maintaining backward compatibility with the default-value style.",
+    "expected_source_ids": []
+  },
+  {
+    "question": "What motivated the design of HTTPException with headers support in FastAPI?",
+    "ground_truth": "FastAPI's HTTPException extends Starlette's HTTPException to add support for custom headers in error responses. This was motivated by use cases like OAuth2 where the WWW-Authenticate header must be included in 401 responses per the specification. FastAPI also modified HTTPException to accept any JSON-serializable detail (not just strings), enabling richer error responses with structured data. This design maintains compatibility with Starlette's exception handling while providing the additional flexibility needed for standards-compliant API error responses.",
+    "expected_source_ids": []
+  },
+  {
+    "question": "Why does FastAPI expose the underlying Request object rather than abstracting it away?",
+    "ground_truth": "FastAPI exposes Starlette's Request object directly because there are legitimate use cases where developers need access to raw request data (like reading the body as bytes, accessing client IP, or handling streaming). Rather than creating a leaky abstraction, FastAPI follows Starlette's philosophy of providing high-level helpers (type-annotated parameters, Pydantic models) for common cases while keeping low-level access available when needed. This escape hatch ensures the framework doesn't become a limitation.",
+    "expected_source_ids": []
+  },
+  {
+    "question": "What was the rationale for FastAPI's approach to WebSocket support and its design choices?",
+    "ground_truth": "FastAPI's WebSocket support is built directly on Starlette's WebSocket implementation, providing WebSocket route decorators (@app.websocket) that follow the same pattern as HTTP route decorators. The design exposes the WebSocket connection object directly rather than abstracting it, allowing full control over the WebSocket lifecycle. Dependencies (Depends()) work with WebSocket routes, enabling shared logic like authentication. This design was chosen for simplicity and consistency with the HTTP routing pattern while leveraging Starlette's battle-tested WebSocket handling.",
+    "expected_source_ids": []
+  }
+]
