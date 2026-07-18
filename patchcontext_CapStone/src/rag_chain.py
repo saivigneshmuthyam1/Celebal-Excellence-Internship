@@ -285,7 +285,23 @@ class PatchContextRAG:
     def __init__(self):
         self.retriever = load_retriever()
         self.id_url_map = _build_id_url_map()
-        self.llm = ChatGroq(model=LLM_MODEL, temperature=LLM_TEMPERATURE, api_key=GROQ_API_KEY_EVAL)
+        
+        # Fetch key dynamically to avoid import-time caching on Streamlit Cloud
+        import os
+        try:
+            import streamlit as st
+        except ImportError:
+            st = None
+            
+        api_key = os.getenv("GROQ_API_KEY_EVAL") or os.getenv("GROQ_API_KEY", "")
+        if not api_key and st is not None and hasattr(st, "secrets"):
+            api_key = st.secrets.get("GROQ_API_KEY_EVAL", st.secrets.get("GROQ_API_KEY", ""))
+            
+        # Fallback to config if somehow still empty
+        if not api_key:
+            api_key = GROQ_API_KEY_EVAL
+            
+        self.llm = ChatGroq(model=LLM_MODEL, temperature=LLM_TEMPERATURE, api_key=api_key)
 
     def query(self, question: str) -> dict:
         """
