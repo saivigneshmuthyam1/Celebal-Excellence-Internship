@@ -285,23 +285,7 @@ class PatchContextRAG:
     def __init__(self):
         self.retriever = load_retriever()
         self.id_url_map = _build_id_url_map()
-        
-        # Fetch key dynamically to avoid import-time caching on Streamlit Cloud
-        import os
-        try:
-            import streamlit as st
-        except ImportError:
-            st = None
-            
-        api_key = os.getenv("GROQ_API_KEY_EVAL") or os.getenv("GROQ_API_KEY", "")
-        if not api_key and st is not None and hasattr(st, "secrets"):
-            api_key = st.secrets.get("GROQ_API_KEY_EVAL", st.secrets.get("GROQ_API_KEY", ""))
-            
-        # Fallback to config if somehow still empty
-        if not api_key:
-            api_key = GROQ_API_KEY_EVAL
-            
-        self.llm = ChatGroq(model=LLM_MODEL, temperature=LLM_TEMPERATURE, api_key=api_key)
+        self.llm = ChatGroq(model=LLM_MODEL, temperature=LLM_TEMPERATURE, api_key=GROQ_API_KEY_EVAL)
 
     def query(self, question: str) -> dict:
         """
@@ -369,9 +353,19 @@ class PatchContextRAG:
                     doc_embedding = np.array(embedding_fn.embed_query(doc.page_content))
                     scored_docs_map[doc.page_content] = float(np.linalg.norm(query_embedding - doc_embedding))
                 
-                avg_score = sum(scored_docs_map.values()) / max(len(scored_docs_map), 1)
+                scores = sorted([
+                    scored_docs_map.get(d.page_content, RELEVANCE_GATE_THRESHOLD + 1)
+                    for d in source_docs
+                ])
 
-                if avg_score > RELEVANCE_GATE_THRESHOLD:
+                # Use the average of the best 2 scores only.
+                # Rationale: if the top 2 retrieved docs are genuinely relevant,
+                # the system has enough grounding to attempt an answer — weak
+                # filler docs in positions 3-6 should not veto the answer.
+                # The model's context-only prompt will ignore irrelevant context.
+                top2_avg = sum(scores[:2]) / 2 if len(scores) >= 2 else (scores[0] if scores else 0)
+
+                if top2_avg > RELEVANCE_GATE_THRESHOLD:
                     return {
                         "question": question,
                         "raw_answer": NO_ANSWER_TEXT,
@@ -381,7 +375,7 @@ class PatchContextRAG:
                         "retrieved_source_texts": {},
                         "forbidden_citation_format": False,
                         "confidence_gate_triggered": True,
-                        "avg_relevance_score": round(avg_score, 3),
+                        "avg_relevance_score": round(top2_avg, 3),
                         "skip_guard": True,
                     }
             else:
