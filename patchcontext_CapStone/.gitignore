@@ -1,0 +1,26 @@
+# Environment variables (contains API keys)
+.env
+.streamlit/secrets.toml
+
+# Data pipeline outputs (large, regenerable)
+data/raw_prs.json
+data/raw_issues.json
+data/raw_commits.json
+data/chunks.json
+data/faiss_index/
+data/benchmark_questions.json
+data/eval_results.json
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.egg-info/
+dist/
+build/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
