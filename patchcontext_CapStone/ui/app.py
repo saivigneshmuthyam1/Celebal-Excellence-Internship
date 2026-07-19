@@ -10,6 +10,7 @@ Launch:
     streamlit run ui/app.py
 """
 
+import base64
 import json
 import re
 import sys
@@ -135,13 +136,12 @@ st.markdown("""
 
     /* ---------- Header ---------- */
     .hero-container {
-        background: #2f2f2f; /* ChatGPT secondary background */
-        border-radius: 12px;
-        padding: 2.5rem 2rem;
-        margin-bottom: 2rem;
+        background: transparent;
+        padding: 1rem 0 2rem 0;
+        margin-bottom: 1rem;
         position: relative;
         overflow: hidden;
-        border: 1px solid #444;
+        border: none;
     }
     @keyframes shimmer {
         0% { transform: translateX(-5%) translateY(-5%); }
@@ -416,9 +416,18 @@ with st.sidebar:
 # ---------------------------------------------------------------------------
 # Hero header
 # ---------------------------------------------------------------------------
-st.markdown("""
+def _get_base64_image(image_path: str) -> str:
+    with open(image_path, "rb") as img_file:
+        return base64.b64encode(img_file.read()).decode('utf-8')
+
+logo_b64 = _get_base64_image(LOGO_PATH)
+
+st.markdown(f"""
 <div class="hero-container">
-    <div class="hero-title">🔍 PatchContext</div>
+    <div class="hero-title">
+        <img src="data:image/png;base64,{logo_b64}" style="height: 1.2em; vertical-align: middle; margin-right: 10px; margin-bottom: 5px;">
+        PatchContext
+    </div>
     <div class="hero-subtitle">
         Ask <em>"why was this designed this way?"</em> about FastAPI — get answers
         grounded in real commits, PRs, and issue discussions with clickable citations
