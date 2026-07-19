@@ -1,5 +1,7 @@
 # PatchContext
 
+🚀 **Live Demo:** [https://patchcontext-fastapi.streamlit.app/](https://patchcontext-fastapi.streamlit.app/)
+
 A Retrieval-Augmented Generation (RAG) system that answers **"why was this designed this way?"** questions about the [FastAPI](https://github.com/fastapi/fastapi) repository, grounding every answer in real commits, pull requests, and issue discussions — with clickable citations and an automated hallucination check.
 
 ## Problem

@@ -107,10 +107,17 @@ def _format_answer_html(answer: str) -> str:
 # ---------------------------------------------------------------------------
 st.set_page_config(
     page_title="PatchContext — FastAPI Design Rationale",
-    page_icon="🔍",
+    page_icon="ui/logo.png",
     layout="wide",
     initial_sidebar_state="expanded",
 )
+
+# Set the sidebar logo
+try:
+    st.logo("ui/logo.png")
+except AttributeError:
+    # st.logo is available in Streamlit >= 1.35.0
+    pass
 
 # ---------------------------------------------------------------------------
 # Custom CSS for a premium look
